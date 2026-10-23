@@ -1,0 +1,32 @@
+{
+  "as_of": "2026-10-22T09:27:27.000Z",
+  "head_block": 95008055,
+  "launches": 706947,
+  "first_launch": "2026-08-03T19:50:47.000Z",
+  "launches_per_day_avg": 8885,
+  "busiest_day": [
+    "2026-09-08",
+    36397
+  ],
+  "graduated": 10393,
+  "graduated_pct": "1.5%",
+  "graduation_hours_median": 0.1,
+  "creators": 417728,
+  "creators_one_launch": 369883,
+  "creators_20plus": 1422,
+  "serial_wallets_20plus": 871,
+  "launches_by_serial_wallets": 89999,
+  "top_serial_wallet_launches": 13791,
+  "shared_launcher_contracts": 551,
+  "launches_via_shared_launchers": 87415,
+  "sample": {
+    "size": 5000,
+    "of_launches_older_than_2_days": 703226,
+    "seed": 42
+  },
+  "sample_graduated_pct": "1.4%",
+  "sample_not_graduated_curve_under_0_01_eth_pct": "97.4%",
+  "sample_not_graduated_curve_under_0_1_eth_pct": "98.4%",
+  "sample_not_graduated_curve_under_1_eth_pct": "98.6%",
+  "rpc_calls": 555
+}

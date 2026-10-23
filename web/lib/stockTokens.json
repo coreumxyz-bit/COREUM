@@ -1,0 +1,146 @@
+[
+ {
+  "sym": "TSLA",
+  "address": "0x322f0929c4625ed5bad873c95208d54e1c003b2d",
+  "name": "Tesla",
+  "yahoo": "TSLA"
+ },
+ {
+  "sym": "NVDA",
+  "address": "0xd0601ce157db5bdc3162bbac2a2c8af5320d9eec",
+  "name": "NVIDIA",
+  "yahoo": "NVDA"
+ },
+ {
+  "sym": "AAPL",
+  "address": "0xaf3d76f1834a1d425780943c99ea8a608f8a93f9",
+  "name": "Apple",
+  "yahoo": "AAPL"
+ },
+ {
+  "sym": "AMZN",
+  "address": "0x12f190a9f9d7d37a250758b26824b97ce941bf54",
+  "name": "Amazon",
+  "yahoo": "AMZN"
+ },
+ {
+  "sym": "MSFT",
+  "address": "0xe93237c50d904957cf27e7b1133b510c669c2e74",
+  "name": "Microsoft",
+  "yahoo": "MSFT"
+ },
+ {
+  "sym": "GOOGL",
+  "address": "0x2e0847e8910a9732eb3fb1bb4b70a580adad4fe3",
+  "name": "Alphabet Class A",
+  "yahoo": "GOOGL"
+ },
+ {
+  "sym": "META",
+  "address": "0xc0d6457c16cc70d6790dd43521c899c87ce02f35",
+  "name": "Meta Platforms",
+  "yahoo": "META"
+ },
+ {
+  "sym": "SPY",
+  "address": "0x117cc2133c37b721f49de2a7a74833232b3b4c0c",
+  "name": "SPDR S&P 500 ETF Trust",
+  "yahoo": "SPY"
+ },
+ {
+  "sym": "QQQ",
+  "address": "0xd5f3879160bc7c32ebb4dc785f8a4f505888de68",
+  "name": "Invesco QQQ",
+  "yahoo": "QQQ"
+ },
+ {
+  "sym": "COIN",
+  "address": "0x6330d8c3178a418788df01a47479c0ce7ccf450b",
+  "name": "Coinbase",
+  "yahoo": "COIN"
+ },
+ {
+  "sym": "AMD",
+  "address": "0x86923f96303d656e4aa86d9d42d1e57ad2023fdc",
+  "name": "AMD",
+  "yahoo": "AMD"
+ },
+ {
+  "sym": "NFLX",
+  "address": "0xe0444ef8bf4ed74f74fd73686e2ddf4c1c5591e8",
+  "name": "Netflix",
+  "yahoo": "NFLX"
+ },
+ {
+  "sym": "PLTR",
+  "address": "0x894e1ec2d74ffe5aef8dc8a9e84686accb964f2a",
+  "name": "Palantir Technologies",
+  "yahoo": "PLTR"
+ },
+ {
+  "sym": "MSTR",
+  "address": "0xec262a75e413fafd0df80480274532c79d42da09",
+  "name": "Strategy Inc.",
+  "yahoo": "MSTR"
+ },
+ {
+  "sym": "AVGO",
+  "address": "0x156e175dd063a8ce274c50654ef40e0032b3fbcf",
+  "name": "Broadcom",
+  "yahoo": "AVGO"
+ },
+ {
+  "sym": "GME",
+  "address": "0x1b0e319c6a659f002271b69db8a7df2f911c153e",
+  "name": "GameStop",
+  "yahoo": "GME"
+ },
+ {
+  "sym": "INTC",
+  "address": "0xc72b96e0e48ecd4dc75e1e45396e26300bc39681",
+  "name": "Intel",
+  "yahoo": "INTC"
+ },
+ {
+  "sym": "BABA",
+  "address": "0xad25ac6c84d497db898fa1e8387bf6af3532a1c4",
+  "name": "Alibaba",
+  "yahoo": "BABA"
+ },
+ {
+  "sym": "ORCL",
+  "address": "0xb0992820e760d836549ba69bc7598b4af75dee03",
+  "name": "Oracle",
+  "yahoo": "ORCL"
+ },
+ {
+  "sym": "SHOP",
+  "address": "0xf53f66751b1eff985311b693531e3290f600c410",
+  "name": "Shopify",
+  "yahoo": "SHOP"
+ },
+ {
+  "sym": "SOFI",
+  "address": "0x98e75885157c80992a8d41b696d8c9c6fb30a926",
+  "name": "SoFi Technologies",
+  "yahoo": "SOFI"
+ },
+ {
+  "sym": "RDDT",
+  "address": "0x05b37fb53a299a1b874a619e1c4c404d52c36f4c",
+  "name": "Reddit",
+  "yahoo": "RDDT"
+ },
+ {
+  "sym": "CRCL",
+  "address": "0xdf0992e440dd0be65bd8439b609d6d4366bf1cb5",
+  "name": "Circle Internet Group",
+  "yahoo": "CRCL"
+ },
+ {
+  "sym": "GLD",
+  "address": "0xc9a981fee1f9dec688bb123ccdecc63d0debfc4e",
+  "name": "SPDR Gold Shares",
+  "yahoo": "GLD"
+ }
+]

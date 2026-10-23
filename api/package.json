@@ -1,0 +1,1 @@
+{"name":"coreum-api","private":true,"dependencies":{"ethers":"^6.13.0"},"devDependencies":{"solc":"^0.8.26","wrangler":"^3"}}

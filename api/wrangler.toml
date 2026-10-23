@@ -1,0 +1,25 @@
+name = "coreum"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+[assets]
+directory = "./public"
+binding = "ASSETS"
+
+[triggers]
+crons = ["* * * * *"]
+
+# Workers AI — the reference verification cores run open models here
+[ai]
+binding = "AI"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "coreum"
+database_id = "a5d94a9e-3014-4e82-88a2-c941be518d73"
+
+[vars]
+# Robinhood Chain mainnet (chain id 4663) — used to verify deploy-fee burns
+# and, once ANCHOR_KEY/ANCHOR_ADDR are set, to anchor the ledger on-chain.
+RPC_URL = "https://rpc.mainnet.chain.robinhood.com"

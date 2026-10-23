@@ -1,0 +1,11 @@
+{
+  "CoreumVerdicts": {
+    "chainId": 4663,
+    "address": "0x5A2332aFb10354d2657AAa1Ad1176507E00099C4",
+    "writer": "0xbF798aE793aeE06bF55400C2BF276AA0163cF013",
+    "deployTx": "0x47f2437feaeb642278511a01b88c97b82f0d833eb4254894a81739fc7338d280",
+    "block": 93277780,
+    "compiler": "0.8.26+commit.8a97fa7a.Emscripten.clang",
+    "deployedAt": "2026-10-20T07:27:53.365Z"
+  }
+}

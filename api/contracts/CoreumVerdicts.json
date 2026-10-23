@@ -1,0 +1,285 @@
+{
+  "compiler": "0.8.26+commit.8a97fa7a.Emscripten.clang",
+  "evmVersion": "paris",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "jobId",
+          "type": "uint256"
+        }
+      ],
+      "name": "BadVerdict",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NotWriter",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "jobId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "verdict",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "agreePct",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint8",
+          "name": "cores",
+          "type": "uint8"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "questionHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes32",
+          "name": "ledgerHash",
+          "type": "bytes32"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint32",
+          "name": "ledgerBlock",
+          "type": "uint32"
+        }
+      ],
+      "name": "VerdictSealed",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "NO",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "UNSURE",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "YES",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "jobId",
+          "type": "uint256"
+        }
+      ],
+      "name": "answer",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "verdict",
+          "type": "uint8"
+        },
+        {
+          "internalType": "uint8",
+          "name": "agreePct",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "count",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "lastJobId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "jobId",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "questionHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "ledgerHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "ledgerBlock",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "verdict",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "agreePct",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "cores",
+              "type": "uint8"
+            }
+          ],
+          "internalType": "struct CoreumVerdicts.Input[]",
+          "name": "batch",
+          "type": "tuple[]"
+        }
+      ],
+      "name": "seal",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "jobId",
+          "type": "uint256"
+        }
+      ],
+      "name": "verdictOf",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bytes32",
+              "name": "questionHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "ledgerHash",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "uint32",
+              "name": "ledgerBlock",
+              "type": "uint32"
+            },
+            {
+              "internalType": "uint8",
+              "name": "verdict",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "agreePct",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint8",
+              "name": "cores",
+              "type": "uint8"
+            },
+            {
+              "internalType": "uint64",
+              "name": "sealedAt",
+              "type": "uint64"
+            }
+          ],
+          "internalType": "struct CoreumVerdicts.Verdict",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "writer",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x60a0604052348015600f57600080fd5b50336080526080516107326100366000396000818161012801526102d801526107326000f3fe608060405234801561001057600080fd5b50600436106100935760003560e01c806351cc784f1161006657806351cc784f14610162578063953cb4c01461016b578063abad739e14610180578063b2449d6514610188578063bcaa6cf71461019057600080fd5b806306661abd1461009857806306f70295146100b45780630d48344214610109578063453a2abc14610123575b600080fd5b6100a160015481565b6040519081526020015b60405180910390f35b6100ef6100c2366004610606565b60009081526020819052604090206002015460ff6401000000008204811692650100000000009092041690565b6040805160ff9384168152929091166020830152016100ab565b610111600281565b60405160ff90911681526020016100ab565b61014a7f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b0390911681526020016100ab565b6100a160025481565b61017e61017936600461061f565b6102cd565b005b610111600381565b610111600181565b61025e61019e366004610606565b6040805160e081018252600080825260208201819052918101829052606081018290526080810182905260a0810182905260c08101919091525060009081526020818152604091829020825160e081018452815481526001820154928101929092526002015463ffffffff811692820192909252640100000000820460ff908116606083015265010000000000830481166080830152660100000000000083041660a0820152600160381b90910467ffffffffffffffff1660c082015290565b6040516100ab9190600060e082019050825182526020830151602083015263ffffffff604084015116604083015260ff606084015116606083015260ff608084015116608083015260ff60a08401511660a083015267ffffffffffffffff60c08401511660c083015292915050565b336001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000161461031657604051630751a1cd60e41b815260040160405180910390fd5b60005b81811015610601573683838381811061033457610334610696565b60e0029190910191506001905061035160a08301608084016106ac565b60ff1610806103725750600361036d60a08301608084016106ac565b60ff16115b8061038f5750606461038a60c0830160a084016106ac565b60ff16115b156103b4576040516368b48b8160e11b81528135600482015260240160405180910390fd5b8035600090815260208190526040902060020154600160381b900467ffffffffffffffff16156103e457506105f9565b6040805160e0810182526020808401358252838301359082015290810161041160808401606085016106d6565b63ffffffff16815260200161042c60a08401608085016106ac565b60ff16815260200161044460c0840160a085016106ac565b60ff16815260200161045c60e0840160c085016106ac565b60ff908116825267ffffffffffffffff4281166020938401528435600081815280855260409081902086518155948601516001808701919091559086015160029586018054606089015160808a015160a08b015160c0909b0151909716600160381b026effffffffffffffff00000000000000199a891666010000000000000266ff00000000000019988a1665010000000000029890981666ffff000000000019929099166401000000000264ffffffffff1990931663ffffffff909516949094179190911716959095179390931795909516919091179091558254830190925554101561054a5780356002555b80357f7ba5e4735d8d0867237b819b3f7ac8b7548977b4b194456695589e9c67d1823661057d60a08401608085016106ac565b61058d60c0850160a086016106ac565b61059d60e0860160c087016106ac565b602086013560408701356105b76080890160608a016106d6565b6040805160ff9788168152958716602087015293909516928401929092526060830152608082015263ffffffff90911660a082015260c00160405180910390a2505b600101610319565b505050565b60006020828403121561061857600080fd5b5035919050565b6000806020838503121561063257600080fd5b823567ffffffffffffffff81111561064957600080fd5b8301601f8101851361065a57600080fd5b803567ffffffffffffffff81111561067157600080fd5b85602060e08302840101111561068657600080fd5b6020919091019590945092505050565b634e487b7160e01b600052603260045260246000fd5b6000602082840312156106be57600080fd5b813560ff811681146106cf57600080fd5b9392505050565b6000602082840312156106e857600080fd5b813563ffffffff811681146106cf57600080fdfea2646970667358221220514bd752a8ef71ce776ed4425c5b2c75e426c8aefee29e064c42d70e29b3a9a164736f6c634300081a0033"
+}

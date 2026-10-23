@@ -1,0 +1,39 @@
+name: anchor
+# Hourly: write the Coreum ledger head into a Robinhood Chain transaction
+# (calldata "coreum-anchor:v1:<block>:<hash>") and record it on the site;
+# then bring the Pons census on coreum.xyz/pons up to date.
+# Needs repository secrets ANCHOR_KEY (anchor wallet private key, funded with a
+# little ETH on Robinhood Chain) and COREUM_SECRET (the Worker's SHARED_SECRET).
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: anchor
+  cancel-in-progress: false
+jobs:
+  anchor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install ethers
+        working-directory: api
+        run: npm ci --omit=dev --ignore-scripts
+      - name: Anchor the ledger head
+        working-directory: api
+        env:
+          ANCHOR_KEY: ${{ secrets.ANCHOR_KEY }}
+          COREUM_SECRET: ${{ secrets.COREUM_SECRET }}
+        run: node scripts/anchor.mjs
+      - name: Pons census sync
+        if: always()
+        working-directory: api
+        env:
+          COREUM_SECRET: ${{ secrets.COREUM_SECRET }}
+        run: node scripts/pons-sync.mjs

@@ -1,0 +1,30 @@
+name: snapshot
+on:
+  schedule:
+    - cron: "45 0 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch the public record
+        run: |
+          mkdir -p snapshots
+          d=$(date -u +%F)
+          curl -fsS --max-time 90 "https://www.coreum.xyz/api/export" -o "snapshots/export-$d.json"
+          curl -fsS --max-time 30 "https://www.coreum.xyz/api/stats" -o "snapshots/stats-$d.json"
+          curl -fsS --max-time 30 "https://www.coreum.xyz/api/daily_posts" -o "snapshots/daily-$d.json"
+      - name: Commit if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add snapshots
+          if git diff --cached --quiet; then
+            echo "no changes"
+          else
+            git commit -m "snapshot: $(date -u +%F)"
+            git push
+          fi

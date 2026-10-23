@@ -1,0 +1,425 @@
+﻿@import "tailwindcss";
+
+@theme {
+  /* Colors */
+  --color-void: #000000;
+  --color-bone-white: #ffffff;
+  --color-ash-gray: #8e8e8e;
+  --color-silver-mist: #c4c4c4;
+  --color-electric-iris: #ffffff;
+  --color-saffron-spark: #e9e9e9;
+  --color-deep-verdant: #ffffff;
+
+  /* Typography */
+  --font-display: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --text-caption: 12px;
+  --leading-caption: 1.5;
+  --text-nav-label: 14px;
+  --leading-nav-label: 1.2;
+  --tracking-nav-label: 0.35px;
+  --text-body: 18px;
+  --leading-body: 1.5;
+  --text-heading-2xs: 24px;
+  --leading-heading-2xs: 1.25;
+  --tracking-heading-2xs: -0.48px;
+  --text-heading-xs: 27px;
+  --leading-heading-xs: 1;
+  --text-subheading: 36px;
+  --leading-subheading: 1.2;
+  --text-heading-sm: 42px;
+  --leading-heading-sm: 1.2;
+  --tracking-heading-sm: -1.68px;
+  --text-heading: 48px;
+  --leading-heading: 1.1;
+  --tracking-heading: -1.68px;
+  --text-heading-lg: 78px;
+  --leading-heading-lg: 1.1;
+  --tracking-heading-lg: -3.12px;
+  --text-display: 113px;
+  --leading-display: 1.1;
+  --tracking-display: -4.52px;
+
+
+  /* Radius */
+  --radius-nav: 11px;
+  --radius-cards: 24px;
+  --radius-buttons: 12px;
+  --radius-tags: 9999px;
+}
+
+:root {
+  --color-void: #000000;
+}
+
+/* utilities set border colors; bare borders default to a faint line */
+@layer base {
+  * {
+    border-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+html {
+  background: var(--color-void);
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-void);
+  color: var(--color-bone-white);
+  font-family: var(--font-sans);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: #e9e9e9;
+  color: #0a0707;
+}
+
+.font-mono {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Heavy display voice — matches the brand wordmark */
+h1,
+h2,
+.text-display,
+.text-heading-lg,
+.text-heading,
+.text-heading-sm,
+.text-subheading,
+.text-heading-xs,
+.text-heading-2xs {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+}
+
+/* Type helpers matching the Dala scale */
+.text-display {
+  font-size: var(--text-display);
+  line-height: var(--leading-display);
+  letter-spacing: var(--tracking-display);
+  font-weight: 400;
+}
+
+.text-heading-lg {
+  font-size: var(--text-heading-lg);
+  line-height: var(--leading-heading-lg);
+  letter-spacing: var(--tracking-heading-lg);
+  font-weight: 400;
+}
+
+.text-heading {
+  font-size: var(--text-heading);
+  line-height: var(--leading-heading);
+  letter-spacing: var(--tracking-heading);
+  font-weight: 400;
+}
+
+.text-heading-sm {
+  font-size: var(--text-heading-sm);
+  line-height: var(--leading-heading-sm);
+  letter-spacing: var(--tracking-heading-sm);
+  font-weight: 400;
+}
+
+.text-subheading {
+  font-size: var(--text-subheading);
+  line-height: var(--leading-subheading);
+  font-weight: 400;
+}
+
+.text-heading-xs {
+  font-size: var(--text-heading-xs);
+  line-height: var(--leading-heading-xs);
+  font-weight: 400;
+}
+
+.text-heading-2xs {
+  font-size: var(--text-heading-2xs);
+  line-height: var(--leading-heading-2xs);
+  letter-spacing: var(--tracking-heading-2xs);
+  font-weight: 400;
+}
+
+.text-body-copy {
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
+  font-weight: 400;
+}
+
+.text-nav-label {
+  font-size: var(--text-nav-label);
+  line-height: var(--leading-nav-label);
+  font-weight: 450;
+}
+
+.text-caption-label {
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 450;
+}
+
+/* Light fill — the primary action */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 51px;
+  padding: 0 27px;
+  border-radius: 12px;
+  background: #e9e9e9;
+  color: #0a0707;
+  font-size: 15.5px;
+  line-height: 15.5px;
+  font-weight: 450;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+.btn-lg {
+  height: 51px;
+}
+
+/* White outline — secondary action */
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 51px;
+  padding: 0 27px;
+  border-radius: 12px;
+  border: 1px solid #fff;
+  color: #fff;
+  font-size: 15.5px;
+  line-height: 15.5px;
+  font-weight: 450;
+  white-space: nowrap;
+  transition: opacity 0.2s ease;
+}
+
+.btn-outline:hover {
+  opacity: 0.8;
+}
+
+@media (max-width: 639px) {
+  .btn-primary,
+  .btn-outline {
+    height: 46px;
+    padding: 0 20px;
+    font-size: 14px;
+  }
+}
+
+/* Glass surface — cards and panels */
+.glass {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+/* Second voice in a headline: dimmed, like the cents in a price */
+.text-hype {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.live-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.6);
+  animation: ping 1.8s ease-out infinite;
+}
+
+.pulse-dot {
+  animation: blink 1.8s ease-in-out infinite;
+}
+
+.card-glow {
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-radius: 33px;
+}
+
+.bar-fill {
+  background: #e9e9e9;
+}
+
+.row-in {
+  animation: in 0.5s ease both;
+}
+
+.animate-marquee {
+  animation: marquee 38s linear infinite;
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes ping {
+  70% {
+    box-shadow: 0 0 0 9px rgba(255, 255, 255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes stripes {
+  to {
+    background-position: 34px 0, 0 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .text-hype,
+  .live-dot,
+  .pulse-dot,
+  .bar-fill,
+  .animate-marquee {
+    animation: none;
+  }
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+/* Ghost text link */
+.link-ghost {
+  display: inline-block;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+  font-weight: 450;
+  transition: color 0.2s ease;
+}
+
+.link-ghost:hover {
+  color: var(--color-bone-white);
+}
+
+/* ===== Landing shell ===== */
+@layer components {
+  .wrap {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 clamp(20px, 4vw, 48px);
+    width: 100%;
+  }
+
+  .row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 2px 20px;
+    padding: 16px 0;
+    animation: in 0.7s ease both;
+  }
+
+  .row .a {
+    font-size: 24px;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    color: var(--color-bone-white);
+  }
+
+  .row .a span {
+    color: var(--color-saffron-spark);
+  }
+
+  .row .c {
+    font-size: 15px;
+    color: var(--color-silver-mist);
+  }
+
+  .row .h {
+    grid-row: 1 / 3;
+    grid-column: 2;
+    text-align: right;
+    font: 12px ui-monospace, Menlo, Consolas, monospace;
+    color: var(--color-ash-gray);
+    align-self: center;
+  }
+
+  .row .h i {
+    display: block;
+    font: 600 12px var(--font-sans);
+    font-style: normal;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-electric-iris);
+    margin-bottom: 3px;
+  }
+
+  @keyframes in {
+    from {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .note {
+    font-size: 12px;
+    color: var(--color-ash-gray);
+    margin-top: 14px;
+  }
+
+  .rv {
+    opacity: 0;
+    transform: translateY(26px);
+    transition:
+      opacity 0.9s ease,
+      transform 0.9s ease;
+  }
+
+  .rv.on {
+    opacity: 1;
+    transform: none;
+  }
+
+
+  @media (prefers-reduced-motion: reduce) {
+    .rv {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+    .row {
+      animation: none;
+    }
+  }
+}
+
+

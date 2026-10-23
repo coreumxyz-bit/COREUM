@@ -1,0 +1,41 @@
+name: Pons Radar + Watchlist
+
+# Hourly: the site picks the most active new Pons launches and sends each to the
+# cores as a Token Check (web/app/api/radar/run). The admin key keeps it closed.
+# The hourly run now starts from the Worker cron (api/src/index.js, siteHourly):
+# GitHub schedules were starting hours late. Kept for manual runs.
+on:
+  workflow_dispatch:
+
+jobs:
+  radar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Run the radar
+        env:
+          COREUM_SECRET: ${{ secrets.COREUM_SECRET }}
+        run: |
+          out=$(curl -sS -m 90 -X POST https://www.coreum.xyz/api/radar/run -H "x-coreum-admin: $COREUM_SECRET" -w '\n%{http_code}')
+          code=$(echo "$out" | tail -n1)
+          body=$(echo "$out" | sed '$d')
+          echo "$body"
+          echo "### Pons Radar" >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          echo "$body" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          test "$code" = "200"
+      - name: Run the watchlist
+        if: always()
+        env:
+          COREUM_SECRET: ${{ secrets.COREUM_SECRET }}
+        run: |
+          out=$(curl -sS -m 90 -X POST https://www.coreum.xyz/api/watch/run -H "x-coreum-admin: $COREUM_SECRET" -w '\n%{http_code}')
+          code=$(echo "$out" | tail -n1)
+          body=$(echo "$out" | sed '$d')
+          echo "$body"
+          echo "### Watchlist" >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          echo "$body" >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
+          test "$code" = "200"

@@ -1,0 +1,79 @@
+{
+  "summary": {
+    "as_of": "2026-10-22T09:27:27.000Z",
+    "head_block": 95008055,
+    "launches": 706947,
+    "first_launch": "2026-08-03T19:50:47.000Z",
+    "launches_per_day_avg": 8885,
+    "busiest_day": [
+      "2026-09-08",
+      36397
+    ],
+    "graduated": 10393,
+    "graduated_pct": "1.5%",
+    "graduation_hours_median": 0.1,
+    "creators": 417728,
+    "creators_one_launch": 369883,
+    "creators_20plus": 1422,
+    "serial_wallets_20plus": 871,
+    "launches_by_serial_wallets": 89999,
+    "top_serial_wallet_launches": 13791,
+    "shared_launcher_contracts": 551,
+    "launches_via_shared_launchers": 87415,
+    "sample": {
+      "size": 5000,
+      "of_launches_older_than_2_days": 703226,
+      "seed": 42
+    },
+    "sample_graduated_pct": "1.4%",
+    "sample_not_graduated_curve_under_0_01_eth_pct": "97.4%",
+    "sample_not_graduated_curve_under_0_1_eth_pct": "98.4%",
+    "sample_not_graduated_curve_under_1_eth_pct": "98.6%",
+    "rpc_calls": 555
+  },
+  "examples": {
+    "graduated": [
+      {
+        "token": "0xc4f36c7c1d00dcaab1d01159466afa189bfc7161",
+        "curve": "0x75ff257129bbf6b0e29db95a93228c49664180f8",
+        "blocks_to_dex": 732
+      },
+      {
+        "token": "0x47e9b286730fc8c8736df4a27eda6bfede1c36ac",
+        "curve": "0x43abed62fc4c53dfd480c5cf36e3f6623920b72e",
+        "blocks_to_dex": 5
+      },
+      {
+        "token": "0xa27293f205ab1b4ba47761879b829c3fc8414ad1",
+        "curve": "0x4564fda5d18626e15cedb69bd3fcaa6bcad9ddc7",
+        "blocks_to_dex": 118
+      },
+      {
+        "token": "0x2ee112a74cbf02daedfead1917c919cd783a6514",
+        "curve": "0x889e922d52b84e73a2bf6df500dbb9744280fae3",
+        "blocks_to_dex": 777
+      }
+    ],
+    "empty": [
+      {
+        "token": "0xbb46a11bc66ccb0e77cb88a8e937edb2f4f36acf",
+        "curve": "0xe6110dc94bb91be783d10c5b63078ef78238f425"
+      },
+      {
+        "token": "0x30bae6f8eb384d2bd9eb5ab685b7ed6a21c5586c",
+        "curve": "0x9be6390ec2bc0535033cd8c0df0923ca5d7baaff"
+      },
+      {
+        "token": "0x76ed8f3d906bedc4d30ec88c2d8a2675cff24da9",
+        "curve": "0xa992aaef343c1a813121f4f7cee8f9bfb69717ea"
+      },
+      {
+        "token": "0x7928402e05b9840df1069de17e92ee3a9621ed75",
+        "curve": "0x6d1a01b864efcf4d161315ada7460902a051471f"
+      }
+    ],
+    "factory": "0x7ed598bcef8bd9edd8c97a195c6d13f40801ec7e",
+    "graduated_event": "0xcdb72f157fd3666758a6ce201387ffb52038c7562e4fff352828da1096c4b6b4",
+    "created_event": "0x8d4aad4953d0ca700d468f3753aa14432d1b35b43ec6409f051fb6aa43a89607"
+  }
+}
