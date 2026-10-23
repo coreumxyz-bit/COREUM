@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 // Hourly on Robinhood Chain: (1) anchors the Coreum ledger head, (2) writes new
-// verdicts into the CoreumVerdicts contract (contracts/deployments.json).
+// verdicts into the CoreumVerdicts contract, (3) copies the latest token grades
+// into CoreumTokenRegistry (both in contracts/deployments.json).
 //
 // (1) Anchor:
 //
@@ -128,5 +129,35 @@ async function sealVerdicts() {
   }
 }
 
+// 3) copy the latest token grades into CoreumTokenRegistry — only checks newer
+// than what the registry already holds, so idle hours cost nothing
+async function syncRegistry() {
+  const here = dirname(fileURLToPath(import.meta.url));
+  const dep = JSON.parse(readFileSync(join(here, "..", "contracts", "deployments.json"), "utf8")).CoreumTokenRegistry;
+  if (!dep) return;
+  const { abi } = JSON.parse(readFileSync(join(here, "..", "contracts", "CoreumTokenRegistry.json"), "utf8"));
+  const registry = new Contract(dep.address, abi, wallet);
+  const grades = await getJson("/api/v1/grades");
+  const fresh = [];
+  for (const g of grades) {
+    const cur = await retry(() => registry.gradeOf(g.address), "gradeOf");
+    if (Number(cur.checkedAt) < g.checked_at)
+      fresh.push({ token: g.address, letter: g.letter_code, score: g.score, verdict: g.verdict_code, agreePct: g.agree_pct, jobId: g.job, checkedAt: g.checked_at });
+  }
+  if (!fresh.length) {
+    summary(`CoreumTokenRegistry ${dep.address}: up to date (${grades.length} tokens graded this week).`);
+    return;
+  }
+  for (let i = 0; i < fresh.length; i += 40) {
+    const batch = fresh.slice(i, i + 40);
+    const tx = await retry(() => registry.update(batch), "update");
+    console.log(`update ${batch.length} grades · ${tx.hash} — waiting`);
+    const rcpt = await retry(() => tx.wait(1, 180_000), "receipt");
+    if (!rcpt || rcpt.status !== 1) throw new Error(`registry tx ${tx.hash} failed`);
+    summary(`Wrote ${batch.length} grades to CoreumTokenRegistry · ${EXPLORER}/tx/${tx.hash} · fee ${fee(rcpt)} ETH`);
+  }
+}
+
 await anchorHead();
 await sealVerdicts();
+await syncRegistry();

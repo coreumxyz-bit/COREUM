@@ -7,5 +7,15 @@
     "block": 93277780,
     "compiler": "0.8.26+commit.8a97fa7a.Emscripten.clang",
     "deployedAt": "2026-10-20T07:27:53.365Z"
+  },
+  "CoreumTokenRegistry": {
+    "chainId": 4663,
+    "address": "0x32F69057dFda5785A898e33933853aBD0EEF1Db7",
+    "owner": "0xB9Da492102B865D90BC3b03e6C8f76B0482d374c",
+    "writer": "0xbF798aE793aeE06bF55400C2BF276AA0163cF013",
+    "deployTx": "0xa73c8537427d6e43a449e2b2f4abf11ed5a8c5c58667a6cd440fd69e368ae078",
+    "block": 95836547,
+    "compiler": "0.8.26+commit.8a97fa7a.Emscripten.clang",
+    "deployedAt": "2026-10-23T09:26:45.493Z"
   }
 }

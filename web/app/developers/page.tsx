@@ -129,7 +129,35 @@ Deductions:
 Proof (sealed on Robinhood Chain): ${SITE}/v/107`}</Code>
         </Section>
 
-        <Section n="05" title="What a verdict means">
+        <Section n="05" title="On-chain, for smart contracts">
+          <p>
+            The latest grade of every checked token is written every hour into{" "}
+            <a
+              href="https://robinhoodchain.blockscout.com/address/0x32F69057dFda5785A898e33933853aBD0EEF1Db7?tab=contract"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline decoration-white/30 underline-offset-4 hover:text-white"
+            >
+              CoreumTokenRegistry
+            </a>{" "}
+            on Robinhood Chain. A launchpad, a swap or a vault can read it in one call, with no API and no trust in our servers.
+          </p>
+          <Code>{`interface ICoreumTokenRegistry {
+  // true when the token was graded A or B within maxAge seconds
+  function isClean(address token, uint256 maxAge) external view returns (bool ok, uint8 letter);
+}
+
+ICoreumTokenRegistry constant COREUM = ICoreumTokenRegistry(0x32F69057dFda5785A898e33933853aBD0EEF1Db7);
+
+(bool ok, ) = COREUM.isClean(token, 1 days);
+require(ok, "Coreum: no recent clean grade");`}</Code>
+          <p className="mt-3 text-[14px] text-white/55">
+            gradeOf(token) returns the full entry: letter (1 A to 5 F), score, verdict, agreement, job id and check time. The list it is
+            written from: <code>{`${SITE}/api/v1/grades`}</code>
+          </p>
+        </Section>
+
+        <Section n="06" title="What a verdict means">
           <ul className="list-disc space-y-2 pl-5">
             <li>
               <b className="font-medium text-white">NO_RED_FLAGS</b> — the cores found no major rug-pull signs in the facts shown.
@@ -153,7 +181,7 @@ Proof (sealed on Robinhood Chain): ${SITE}/v/107`}</Code>
           </p>
         </Section>
 
-        <Section n="06" title="Limits and contact">
+        <Section n="07" title="Limits and contact">
           <p>
             Free while in beta. Reads are cached and unmetered; fresh checks follow the site&apos;s daily limits per IP. Need more
             checks for a launchpad or a wallet? Message{" "}
