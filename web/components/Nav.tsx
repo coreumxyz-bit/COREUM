@@ -20,9 +20,9 @@ type L = { href: string; label: string; note?: string };
 // the main things to do are always visible; the rest sit in two groups
 const MAIN: L[] = [
   { href: "/token", label: "Token Check" },
+  { href: "/swap", label: "Safe Swap" },
   { href: "/grades", label: "Grades" },
   { href: "/watch", label: "Watchlist" },
-  { href: "/radar", label: "Radar" },
   { href: "/stocks", label: "Stocks" },
 ];
 const GROUPS: { label: string; links: L[] }[] = [
@@ -40,6 +40,7 @@ const GROUPS: { label: string; links: L[] }[] = [
   {
     label: "More",
     links: [
+      { href: "/radar", label: "Radar", note: "New Pons launches, checked every hour" },
       { href: "/pons", label: "Pons census", note: "Every Pons launch, counted from the chain" },
       { href: "/truth", label: "CT Truth", note: "Check what crypto Twitter claims" },
       { href: "/play", label: "Beat the AI", note: "Call the market against the swarm" },
