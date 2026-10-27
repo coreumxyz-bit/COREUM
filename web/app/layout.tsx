@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import "./hero.css";
 import "./motion.css";
 import PointerGlow from "@/components/PointerGlow";
+import ChatWidget from "@/components/ChatWidget";
 
 // variable font: the hero and nav use in-between weights like 450
 const inter = Inter({
@@ -42,6 +44,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         {children}
         <PointerGlow />
+        <Suspense fallback={null}>
+          <ChatWidget />
+        </Suspense>
       </body>
     </html>
   );

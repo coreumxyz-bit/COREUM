@@ -20,6 +20,7 @@ type L = { href: string; label: string; note?: string };
 // the main things to do are always visible; the rest sit in two groups
 const MAIN: L[] = [
   { href: "/token", label: "Token Check" },
+  { href: "/chat", label: "Ask" },
   { href: "/swap", label: "Safe Swap" },
   { href: "/grades", label: "Grades" },
   { href: "/watch", label: "Watchlist" },

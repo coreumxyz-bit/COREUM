@@ -4,6 +4,7 @@ import { makeWatch } from './watch.js';
 import { makeDeployer } from './deployer.js';
 import { makePons } from './pons.js';
 import { makeCors, HOLDER_PER_DAY as CORS_HOLDER_PER_DAY } from './cors.js';
+import { makeChat, CHAT_HOLDER_PER_DAY } from './chat.js';
 
 const SYMS = {
   BTC: 'BTC-USD', ETH: 'ETH-USD', SOL: 'SOL-USD', DOGE: 'DOGE-USD', LINK: 'LINK-USD',
@@ -71,6 +72,7 @@ const W = makeWatch({ sha, now });
 const D = makeDeployer({ now });
 const PONS = makePons({ now });
 const CORS = makeCors({ sha, now });
+const CHAT = makeChat({ V, now, sha });
 
 const last = (db, s) =>
   db.prepare('SELECT p,t FROM prices WHERE sym=? ORDER BY t DESC LIMIT 1').bind(s).first();
@@ -687,6 +689,14 @@ const worker = {
       }
       if (p === '/api/arena') return J(await arena(db));
       // ---- verification network ----
+      // Ask Coreum chat: only through the site, which passes the visitor's IP and holder wallet
+      if (p === '/api/chat' && req.method === 'POST') {
+        if (!env.SHARED_SECRET || req.headers.get('x-coreum-secret') !== env.SHARED_SECRET) return J({ error: 'forbidden' }, 403);
+        const holder = req.headers.get('x-coreum-holder');
+        const isH = holder && (await CORS.isHolder(env, holder));
+        const r = await CHAT.chat(env, await req.json(), isH ? 'holder:' + holder.toLowerCase() : 'ip:' + cip(req, env), isH ? CHAT_HOLDER_PER_DAY : undefined);
+        return r.e ? J({ error: r.e }, r.s) : J(r);
+      }
       if (p === '/api/ask' && req.method === 'POST') {
         const b = await req.json();
         const k = (req.headers.get('authorization') || '').replace(/^Bearer /, '');
