@@ -12,12 +12,52 @@ type Msg = { role: "user" | "assistant"; content: string; status?: string; start
 type Chat = { id: string; title: string; ts: number; msgs: Msg[]; remote?: boolean };
 
 const STORE = "coreum_chats";
-const SUGGEST = [
-  { t: "Which THKR is the real one?", s: "Tell copycats apart by ticker" },
+// starter questions: a few from what the network just checked, the rest drawn from a pool
+const POOL = [
   { t: "Is $CORS safe to hold?", s: "Grade, red flags, proof link" },
-  { t: "What got red flags on Pons today?", s: "Read the radar" },
   { t: "What can I do with $CORS?", s: "Holder tier, API keys, cores" },
+  { t: "What got red flags on Pons today?", s: "Read the radar" },
+  { t: "Which THKR is the real one?", s: "Tell copycats apart by ticker" },
+  { t: "How do I spot a rug before buying?", s: "The checks that matter" },
+  { t: "What does an F grade mean?", s: "How grades are scored" },
+  { t: "How does Coreum know a verdict wasn't changed?", s: "Commit, reveal, sealed on chain" },
+  { t: "How many tokens launched on Pons?", s: "The census, counted from the chain" },
+  { t: "How do I run my own core?", s: "First 50 cores, seat #1 is open" },
+  { t: "What are snipers and why do they matter?", s: "Launch buyers, explained" },
+  { t: "Which Robinhood stock tokens are official?", s: "Real shares vs borrowed tickers" },
+  { t: "How do I add Coreum checks to my bot?", s: "API, MCP, badge" },
+  { t: "Is a renounced owner enough to be safe?", s: "What it does and doesn't prove" },
+  { t: "What's the network's average agreement?", s: "Live network stats" },
 ];
+const shuffle = <T,>(a: T[]) => a.map((x) => [Math.random(), x] as const).sort((p, q) => p[0] - q[0]).map(([, x]) => x);
+
+function useSuggestions() {
+  const [list, setList] = useState(POOL.slice(0, 4));
+  useEffect(() => {
+    const picked = shuffle(POOL);
+    setList(picked.slice(0, 4));
+    fetch("/api/radar")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j: { checks?: { verdict: string; src?: { symbol?: string } }[] } | null) => {
+        const seen = new Set<string>();
+        const fresh = (j?.checks ?? []).filter((c) => {
+          const sym = c.src?.symbol;
+          if (!sym || seen.has(sym) || /^\$?CORS$/i.test(sym)) return false;
+          seen.add(sym);
+          return true;
+        });
+        if (!fresh.length) return;
+        const live = shuffle(fresh.slice(0, 6)).slice(0, 2).map((c, i) =>
+          i === 0
+            ? { t: `Is $${c.src!.symbol} safe?`, s: c.verdict === "NO" ? "Just checked: red flags" : "Just checked by the network" }
+            : { t: `Who launched $${c.src!.symbol}?`, s: "Deployer history on Pons" }
+        );
+        setList([...live, ...picked.filter((x) => !live.some((l) => l.t === x.t))].slice(0, 4));
+      })
+      .catch(() => {});
+  }, []);
+  return list;
+}
 
 const load = (): Chat[] => {
   try {
@@ -333,6 +373,7 @@ function Message({ m, last, onRetry }: { m: Msg; last: boolean; onRetry: () => v
 
 export function ChatBox({ full = false }: { full?: boolean }) {
   const c = useChats();
+  const suggest = useSuggestions();
   const end = useRef<HTMLDivElement>(null);
   const msgs = c.chat?.msgs ?? [];
   useEffect(() => {
@@ -345,7 +386,7 @@ export function ChatBox({ full = false }: { full?: boolean }) {
       <h2 className={`${full ? "mt-5 text-[clamp(28px,4vw,40px)]" : "mt-4 text-[22px]"} leading-tight tracking-[-0.02em] text-white`}>What do you want to check?</h2>
       <p className="mt-2 max-w-[460px] text-[14px] text-white/50">Tokens, tickers and wallets on Robinhood Chain, answered from Coreum&apos;s checks with the proof. Or ask anything.</p>
       <div className={`mt-6 grid w-full max-w-[640px] gap-2 ${full ? "sm:grid-cols-2" : ""}`}>
-        {SUGGEST.map((s) => (
+        {suggest.map((s) => (
           <button key={s.t} type="button" onClick={() => c.send(s.t)} className="rounded-[16px] border border-white/[0.12] bg-white/[0.03] px-4 py-3 text-left transition-colors hover:border-white/30 hover:bg-white/[0.06]">
             <span className="block text-[14px] text-white">{s.t}</span>
             <span className="mt-0.5 block text-[12px] text-white/45">{s.s}</span>
