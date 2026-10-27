@@ -55,3 +55,26 @@ export function holderFromCookie(v: string | undefined): string | null {
   const want = sig(addr);
   return s.length === want.length && timingSafeEqual(Buffer.from(s), Buffer.from(want)) ? addr : null;
 }
+
+// Wallet sign-in: a nonce the site can check without storing it, and a signed session cookie.
+const mac = (s: string) => createHmac("sha256", process.env.COREUM_SITE_SECRET ?? "dev").update(s).digest("hex").slice(0, 32);
+export const SESSION_COOKIE = "coreum_wallet";
+export const signInMessage = (addr: string, nonce: string) =>
+  `Sign in to Coreum\n\nWallet: ${addr.toLowerCase()}\nNonce: ${nonce}\n\nThis only proves the wallet is yours. No transaction, no gas.`;
+export function newNonce(): string {
+  const body = `${Date.now()}.${Math.random().toString(36).slice(2, 10)}`;
+  return `${body}.${mac("nonce:" + body)}`;
+}
+export function nonceOk(nonce: string, maxAgeMs = 10 * 60_000): boolean {
+  const [ts, r, m] = String(nonce || "").split(".");
+  if (!ts || !r || !m) return false;
+  const want = mac(`nonce:${ts}.${r}`);
+  return m.length === want.length && timingSafeEqual(Buffer.from(m), Buffer.from(want)) && Date.now() - Number(ts) < maxAgeMs;
+}
+export const sessionCookie = (addr: string) => `${addr.toLowerCase()}.${mac("wallet:" + addr.toLowerCase())}`;
+export function sessionFromCookie(v: string | undefined): string | null {
+  const [addr, s] = String(v || "").split(".");
+  if (!/^0x[0-9a-f]{40}$/.test(addr || "") || !s) return null;
+  const want = mac("wallet:" + addr);
+  return s.length === want.length && timingSafeEqual(Buffer.from(s), Buffer.from(want)) ? addr : null;
+}

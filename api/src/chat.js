@@ -156,9 +156,11 @@ export function makeChat({ V, now, sha }) {
   async function run(env, hist, left, send) {
     // the latest message decides the language, not the history
     const last = hist[hist.length - 1].content;
-    const lang = /[а-яёіїєґ]/i.test(last) ? (/[іїєґ]/i.test(last) ? 'Ukrainian' : 'Russian') : /^[ -s$€£…–—'"“”‘’]*$/.test(last) ? 'English' : '';
+    const ascii = !/[^ -~\s$€£…–—'"“”‘’]/.test(last);
     const messages = [{ role: 'system', content: SYSTEM }, ...hist];
-    if (lang) messages.push({ role: 'system', content: `The user's latest message is in ${lang}. Write your whole answer in ${lang}.` });
+    messages.push({ role: 'system', content: ascii
+      ? "The user's latest message is in English. Write your whole answer in English."
+      : "Write your whole answer in exactly the language of the user's latest message (if it is Russian, answer in Russian, not Ukrainian)." });
     const checks = [];
     try {
       for (let round = 0; round <= MAX_ROUNDS; round++) {

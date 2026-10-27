@@ -24,10 +24,12 @@ export function makeCors({ sha, now }) {
   async function recordHolder(env, b) {
     const addr = String(b.addr || '').toLowerCase();
     if (!addrOk(addr)) return { e: 'bad address', s: 400 };
-    let who = '';
-    try { who = verifyMessage(HOLDER_MSG(addr), String(b.sig || '')).toLowerCase(); }
-    catch { return { e: 'bad signature', s: 400 }; }
-    if (who !== addr) return { e: 'signature does not match the address', s: 403 };
+    if (!b.signed_in) {
+      let who = '';
+      try { who = verifyMessage(HOLDER_MSG(addr), String(b.sig || '')).toLowerCase(); }
+      catch { return { e: 'bad signature', s: 400 }; }
+      if (who !== addr) return { e: 'signature does not match the address', s: 403 };
+    }
     const amount = BigInt(String(b.amount || '0'));
     if (amount < HOLDER_MIN * WEI) return { ok: false, amount: String(amount / WEI), need: String(HOLDER_MIN) };
     await env.DB.prepare('INSERT INTO holders(addr,amount,ts) VALUES(?,?,?) ON CONFLICT(addr) DO UPDATE SET amount=excluded.amount,ts=excluded.ts')

@@ -5,6 +5,7 @@ import { makeDeployer } from './deployer.js';
 import { makePons } from './pons.js';
 import { makeCors, HOLDER_PER_DAY as CORS_HOLDER_PER_DAY } from './cors.js';
 import { makeChat, CHAT_HOLDER_PER_DAY } from './chat.js';
+import { makeChats } from './chats.js';
 
 const SYMS = {
   BTC: 'BTC-USD', ETH: 'ETH-USD', SOL: 'SOL-USD', DOGE: 'DOGE-USD', LINK: 'LINK-USD',
@@ -73,6 +74,7 @@ const D = makeDeployer({ now });
 const PONS = makePons({ now });
 const CORS = makeCors({ sha, now });
 const CHAT = makeChat({ V, now, sha });
+const CHATS = makeChats({ now });
 
 const last = (db, s) =>
   db.prepare('SELECT p,t FROM prices WHERE sym=? ORDER BY t DESC LIMIT 1').bind(s).first();
@@ -689,6 +691,17 @@ const worker = {
       }
       if (p === '/api/arena') return J(await arena(db));
       // ---- verification network ----
+      // wallet sign-in and the chat history that follows it (site only)
+      if (p === '/api/auth/verify' || p.startsWith('/api/chats')) {
+        if (!env.SHARED_SECRET || req.headers.get('x-coreum-secret') !== env.SHARED_SECRET) return J({ error: 'forbidden' }, 403);
+        if (p === '/api/auth/verify') { const r = CHATS.verify(await req.json()); return r.e ? J({ error: r.e }, r.s) : J(r); }
+        const addr = String(q.get('addr') || '').toLowerCase();
+        if (p === '/api/chats' && req.method === 'GET') return J(await CHATS.list(env, addr));
+        if (p === '/api/chats/one') { const c = await CHATS.one(env, addr, q.get('id')); return c ? J(c) : J({ error: 'not found' }, 404); }
+        if (p === '/api/chats/save' && req.method === 'POST') { const r = await CHATS.save(env, await req.json()); return r.e ? J({ error: r.e }, r.s) : J(r); }
+        if (p === '/api/chats/delete' && req.method === 'POST') { const b = await req.json(); return J(await CHATS.remove(env, b.addr, b.id)); }
+        return J({ error: 'not found' }, 404);
+      }
       // Ask Coreum chat: only through the site, which passes the visitor's IP and holder wallet
       if (p === '/api/chat' && req.method === 'POST') {
         if (!env.SHARED_SECRET || req.headers.get('x-coreum-secret') !== env.SHARED_SECRET) return J({ error: 'forbidden' }, 403);

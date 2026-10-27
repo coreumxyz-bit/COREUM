@@ -2,8 +2,9 @@
 
 /* hero video: black & white, slow push-in */
 .hero-video {
-  filter: grayscale(1) contrast(1.15) brightness(0.8);
+  /* the grade is baked into the file; only a cheap GPU transform runs here */
   animation: push-in 24s ease-in-out infinite alternate;
+  will-change: transform;
 }
 @keyframes push-in {
   from {
@@ -259,3 +260,33 @@ body::after {
     animation: none;
   }
 }
+
+/* "New: Ask Coreum" pill on the home hero */
+@property --pill-angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+.chat-pill {
+  position: relative;
+  isolation: isolate;
+  background: rgba(10, 10, 10, 0.55);
+  backdrop-filter: blur(17px);
+  box-shadow: 0 0 34px rgba(255, 255, 255, 0.08);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s ease;
+}
+.chat-pill::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  z-index: -1;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(from var(--pill-angle), rgba(255, 255, 255, 0.12) 0deg, rgba(255, 255, 255, 0.12) 250deg, #fff 320deg, rgba(255, 255, 255, 0.12) 360deg);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: pill-spin 3.2s linear infinite;
+}
+.chat-pill:hover { transform: translateY(-1px); box-shadow: 0 0 46px rgba(255, 255, 255, 0.16); }
+.chat-pill-arrow { display: inline-block; transition: transform 0.3s ease; animation: pill-nudge 2.4s ease-in-out infinite; }
+.chat-pill:hover .chat-pill-arrow { transform: translateX(4px); }
+@keyframes pill-spin { to { --pill-angle: 360deg; } }
+@keyframes pill-nudge { 0%, 70%, 100% { transform: translateX(0); } 80% { transform: translateX(4px); } 90% { transform: translateX(0); } }
+@media (prefers-reduced-motion: reduce) { .chat-pill::before, .chat-pill-arrow { animation: none; } }

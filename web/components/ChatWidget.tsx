@@ -5,10 +5,11 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import LogoMark from "@/components/LogoMark";
 import { Markdown } from "@/lib/markdown";
+import { connectWallet, signMessage } from "@/lib/holder";
 
 type Started = { address: string; symbol?: string; job?: number; page?: string; error?: string };
 type Msg = { role: "user" | "assistant"; content: string; status?: string; started?: Started[]; error?: string; live?: boolean };
-type Chat = { id: string; title: string; ts: number; msgs: Msg[] };
+type Chat = { id: string; title: string; ts: number; msgs: Msg[]; remote?: boolean };
 
 const STORE = "coreum_chats";
 const SUGGEST = [
@@ -25,29 +26,102 @@ const load = (): Chat[] => {
     return [];
   }
 };
-const save = (c: Chat[]) => {
+const saveLocal = (c: Chat[]) => {
   try {
-    localStorage.setItem(STORE, JSON.stringify(c.slice(0, 30)));
+    if (c.length) localStorage.setItem(STORE, JSON.stringify(c.slice(0, 30)));
+    else localStorage.removeItem(STORE);
   } catch {}
 };
 const newId = () => Math.random().toString(36).slice(2, 10);
+const clean = (c: Chat) => ({ id: c.id, title: c.title, ts: c.ts, msgs: c.msgs.map(({ live, status, ...m }) => m) });
+const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 
-/** Conversations kept in this browser; the open one streams from /api/chat. */
+/**
+ * Conversations: in this browser for guests, on the server for a signed-in wallet
+ * (so they follow it to any device). The open one streams from /api/chat.
+ */
 function useChats() {
   const [chats, setChats] = useState<Chat[]>([]);
   const [cur, setCur] = useState<string>("");
   const [busy, setBusy] = useState(false);
   const [left, setLeft] = useState<number | null>(null);
+  const [me, setMe] = useState<string | null>(null);
+  const [authErr, setAuthErr] = useState("");
+  const [ready, setReady] = useState(false); // nothing is written back before the history is read
   const stop = useRef<AbortController | null>(null);
+  const latest = useRef<Chat[]>([]);
+  latest.current = chats;
+  const meRef = useRef<string | null>(null);
+  meRef.current = me;
+
+  // a signed-in wallet: upload this browser's chats once, then the server is the source
+  const loadRemote = useCallback(async () => {
+    const local = load();
+    for (const c of local) await fetch("/api/chats", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(clean(c)) }).catch(() => null);
+    if (local.length) saveLocal([]);
+    const list = (await fetch("/api/chats").then((r) => (r.ok ? r.json() : [])).catch(() => [])) as { id: string; title: string; ts: number }[];
+    setChats(list.map((c) => ({ ...c, msgs: [], remote: true })));
+    setCur("");
+  }, []);
 
   useEffect(() => {
-    const c = load();
-    setChats(c);
-    if (c[0]) setCur(c[0].id);
-  }, []);
+    void (async () => {
+      const a = (await fetch("/api/auth").then((r) => r.json()).catch(() => ({}))) as { addr?: string | null };
+      if (a.addr) {
+        setMe(a.addr);
+        await loadRemote();
+      } else {
+        const c = load();
+        setChats(c);
+        if (c[0]) setCur(c[0].id);
+      }
+      setReady(true);
+    })();
+  }, [loadRemote]);
   useEffect(() => {
-    if (chats.length) save(chats.map((c) => ({ ...c, msgs: c.msgs.map((m) => ({ ...m, live: false })) })));
-  }, [chats]);
+    if (ready && !me) saveLocal(chats.map(clean));
+  }, [chats, me, ready]);
+
+  // open a server chat: its messages load on first view
+  const open = async (id: string) => {
+    setCur(id);
+    const c = latest.current.find((x) => x.id === id);
+    if (!c?.remote || c.msgs.length) return;
+    const full = (await fetch(`/api/chats?id=${id}`).then((r) => (r.ok ? r.json() : null)).catch(() => null)) as Chat | null;
+    if (full) setChats((cs) => cs.map((x) => (x.id === id ? { ...x, msgs: full.msgs, remote: false } : x)));
+  };
+  const persist = (id: string) => {
+    if (!meRef.current) return;
+    setTimeout(() => {
+      const c = latest.current.find((x) => x.id === id);
+      if (c) void fetch("/api/chats", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(clean(c)) }).catch(() => null);
+    }, 50);
+  };
+
+  const signIn = async () => {
+    setAuthErr("");
+    try {
+      const addr = await connectWallet();
+      if (!addr) throw new Error("no wallet connected");
+      const n = (await fetch(`/api/auth?addr=${addr}`).then((r) => r.json())) as { message: string; nonce: string };
+      const sig = await signMessage(n.message, addr);
+      if (!sig) throw new Error("the signature was rejected");
+      const r = await fetch("/api/auth", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ addr, sig, nonce: n.nonce }) });
+      const j = await r.json();
+      if (!r.ok) throw new Error(j.error ?? "sign-in failed");
+      setMe(j.addr);
+      await loadRemote();
+    } catch (e) {
+      setAuthErr(e instanceof Error ? e.message : String(e));
+    }
+  };
+  const signOut = async () => {
+    await fetch("/api/auth", { method: "DELETE" }).catch(() => null);
+    setMe(null);
+    setChats([]);
+    saveLocal([]);
+    setCur("");
+  };
 
   const chat = chats.find((c) => c.id === cur);
   const patchLast = (id: string, f: (m: Msg) => Msg) =>
@@ -94,6 +168,7 @@ function useChats() {
     }
     patchLast(id, (m) => ({ ...m, live: false, status: undefined }));
     setBusy(false);
+    persist(id);
   }, []);
 
   const send = (text: string) => {
@@ -118,14 +193,36 @@ function useChats() {
     if (!busy) setCur("");
   };
   const remove = (id: string) => {
-    setChats((cs) => {
-      const n = cs.filter((c) => c.id !== id);
-      if (!n.length) save([]);
-      return n;
-    });
+    setChats((cs) => cs.filter((c) => c.id !== id));
+    if (me) void fetch(`/api/chats?id=${id}`, { method: "DELETE" }).catch(() => null);
     if (id === cur) setCur("");
   };
-  return { chats, chat, cur, setCur, busy, left, send, retry, fresh, remove, stop: () => stop.current?.abort() };
+  return { chats, chat, cur, setCur: open, busy, left, send, retry, fresh, remove, me, signIn, signOut, authErr, stop: () => stop.current?.abort() };
+}
+
+function Account({ c, compact }: { c: ReturnType<typeof useChats>; compact?: boolean }) {
+  if (c.me)
+    return (
+      <div className={`flex items-center justify-between gap-2 ${compact ? "text-[11px]" : "text-[12px]"} text-white/50`}>
+        <span className="flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-white" /> <span className="font-mono">{short(c.me)}</span>
+        </span>
+        <button type="button" onClick={() => void c.signOut()} className="hover:text-white">Sign out</button>
+      </div>
+    );
+  return (
+    <div>
+      <button
+        type="button"
+        onClick={() => void c.signIn()}
+        className={compact ? "text-[11px] text-white/60 underline decoration-white/25 underline-offset-2 hover:text-white" : "w-full rounded-[12px] bg-white px-3 py-2.5 text-[14px] font-medium text-black hover:bg-white/90"}
+      >
+        {compact ? "Sign in with wallet to keep chats" : "Sign in with wallet"}
+      </button>
+      {!compact && <p className="mt-2 text-[11px] leading-relaxed text-white/40">One signature, no gas. Your chats follow your wallet to any device; 1M $CORS holders get 150 messages a day.</p>}
+      {c.authErr && <p className="mt-1.5 text-[11px] text-white/55">{c.authErr}</p>}
+    </div>
+  );
 }
 
 function Composer({ onSend, onStop, busy, big }: { onSend: (t: string) => void; onStop: () => void; busy: boolean; big?: boolean }) {
@@ -275,6 +372,9 @@ export function ChatBox({ full = false }: { full?: boolean }) {
       <p className="mt-2 text-center text-[11px] text-white/35">
         Ask Coreum can be wrong. A risk screen, not financial advice{c.left !== null ? ` · ${c.left} messages left today` : ""}
       </p>
+      <div className={`mt-1.5 ${full ? "lg:hidden" : ""}`}>
+        <Account c={c} compact />
+      </div>
     </div>
   );
 
@@ -306,7 +406,9 @@ export function ChatBox({ full = false }: { full?: boolean }) {
             </div>
           ))}
         </div>
-        <p className="px-2 pt-3 text-[11px] leading-relaxed text-white/35">Chats stay in this browser. 30 messages a day, 150 for $CORS holders.</p>
+        <div className="border-t border-white/[0.08] px-1 pt-3">
+          <Account c={c} />
+        </div>
       </aside>
       <div className="flex min-w-0 flex-1 flex-col">
         <div className="flex items-center justify-between px-4 pt-2 lg:hidden">
@@ -336,7 +438,7 @@ function ChatHeaderHook({ onNew }: { onNew: () => void }) {
 export default function ChatWidget() {
   const path = usePathname();
   const [open, setOpen] = useState(false);
-  if (path === "/" || path === "/chat" || path?.startsWith("/embed")) return null;
+  if (path === "/chat" || path?.startsWith("/embed")) return null;
   return (
     <>
       {open && (
