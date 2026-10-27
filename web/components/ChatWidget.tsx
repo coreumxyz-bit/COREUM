@@ -336,7 +336,7 @@ function ChatHeaderHook({ onNew }: { onNew: () => void }) {
 export default function ChatWidget() {
   const path = usePathname();
   const [open, setOpen] = useState(false);
-  if (path === "/chat" || path?.startsWith("/embed")) return null;
+  if (path === "/" || path === "/chat" || path?.startsWith("/embed")) return null;
   return (
     <>
       {open && (

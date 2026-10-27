@@ -24,7 +24,6 @@ const MAIN: L[] = [
   { href: "/swap", label: "Safe Swap" },
   { href: "/grades", label: "Grades" },
   { href: "/watch", label: "Watchlist" },
-  { href: "/stocks", label: "Stocks" },
 ];
 const GROUPS: { label: string; links: L[] }[] = [
   {
@@ -43,6 +42,7 @@ const GROUPS: { label: string; links: L[] }[] = [
   {
     label: "More",
     links: [
+      { href: "/stocks", label: "Stocks", note: "Robinhood stock tokens against the real shares" },
       { href: "/radar", label: "Radar", note: "New Pons launches, checked every hour" },
       { href: "/pons", label: "Pons census", note: "Every Pons launch, counted from the chain" },
       { href: "/truth", label: "CT Truth", note: "Check what crypto Twitter claims" },
@@ -56,7 +56,7 @@ const GROUPS: { label: string; links: L[] }[] = [
 ];
 
 const icon = "absolute inset-0 h-5 w-5 text-white transition-all duration-300 ease-out";
-const pill = "rounded-[8px] px-[14px] py-[10px] text-[14px] leading-[14px] font-[450] whitespace-nowrap transition-colors hover:bg-white/[0.06] hover:text-white";
+const pill = "rounded-[8px] px-[13px] py-[10px] text-[14px] leading-[14px] font-[450] whitespace-nowrap transition-colors hover:bg-white/[0.06] hover:text-white";
 
 // external links in the menus open in a new tab
 const ext = (href: string) => (href.startsWith("http") ? { target: "_blank", rel: "noopener noreferrer" } : {});
@@ -110,7 +110,7 @@ export default function Nav({ active }: { active?: string }) {
             scrolled ? "border-white/[0.08] opacity-100" : "border-transparent opacity-0"
           }`}
         />
-        <nav className="relative z-50 mx-auto flex w-full max-w-[1180px] items-center justify-between px-5 pt-[20px] sm:px-8 sm:pt-[30px]">
+        <nav className="relative z-50 mx-auto flex w-full max-w-[1280px] items-center justify-between gap-5 px-5 pt-[20px] sm:px-8 sm:pt-[30px]">
           <Animate delay={0} direction="down">
             <Logo />
           </Animate>

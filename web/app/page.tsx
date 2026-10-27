@@ -9,6 +9,7 @@ import BurnCounter from "@/components/BurnCounter";
 import NetworkCard from "@/components/NetworkCard";
 import OnchainProof from "@/components/OnchainProof";
 import AskBox from "@/components/AskBox";
+import { ChatBox } from "@/components/ChatWidget";
 import Animate from "@/components/Animate";
 import Words from "@/components/Words";
 import { api } from "@/lib/api";
@@ -137,7 +138,7 @@ export default function Home() {
             {/* room for the fixed nav */}
             <div className="h-[64px] shrink-0 sm:h-[82px]" />
             <div className="flex flex-1 items-center pt-8 pb-16 lg:py-8">
-              <Wrap className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(0,1fr)_440px] lg:gap-16">
+              <Wrap className="grid grid-cols-1 items-center gap-10 lg:grid-cols-[minmax(0,1fr)_470px] lg:gap-14">
                 <div className="w-full">
                   <Animate delay={150} direction="up">
                     <p className="mb-5 inline-flex items-center gap-2 rounded-[8px] border border-white/[0.14] bg-white/[0.06] px-3 py-1.5 text-[13px] text-white/80 backdrop-blur-[17px]">
@@ -177,7 +178,19 @@ export default function Home() {
                     </div>
                   </Animate>
                 </div>
-                <NetworkCard />
+                <Animate delay={600} direction="up">
+                  <div className="flex h-[min(560px,calc(100svh-150px))] min-h-[460px] flex-col overflow-hidden rounded-[24px] border border-white/[0.16] bg-black/55 shadow-[0_30px_100px_rgba(0,0,0,0.55)] backdrop-blur-[24px]">
+                    <div className="flex items-center justify-between border-b border-white/[0.08] px-4 py-3">
+                      <span className="flex items-center gap-2 text-[15px] text-white">
+                        <span className="live-dot" /> Ask Coreum
+                      </span>
+                      <Link href="/chat" className="rounded-[8px] px-2 py-1 text-[12px] text-white/55 hover:bg-white/[0.08] hover:text-white">
+                        Full screen
+                      </Link>
+                    </div>
+                    <ChatBox />
+                  </div>
+                </Animate>
               </Wrap>
             </div>
           </div>
@@ -187,6 +200,11 @@ export default function Home() {
         <Suspense fallback={<div className="h-[50px] border-y border-white/10" />}>
           <NetStrip />
         </Suspense>
+        <Wrap className="pt-16">
+          <div className="mx-auto max-w-[560px]">
+            <NetworkCard />
+          </div>
+        </Wrap>
 
         {/* What the network does */}
         <section id="work" data-s className={SECTION}>
