@@ -102,9 +102,9 @@ export default function DevelopersPage() {
             <Link href="/cors" className="underline decoration-white/30 underline-offset-4 hover:text-white">/cors</Link> for an API
             key with 500 checks a day for 30 days, and send it as a header:
           </p>
-          <Code>{`curl -X POST ${SITE}/api/v1/check \
-  -H "authorization: Bearer cak_…" \
-  -H "content-type: application/json" \
+          <Code>{`curl -X POST ${SITE}/api/v1/check \\
+  -H "authorization: Bearer cak_…" \\
+  -H "content-type: application/json" \\
   -d '{"address": "${A}"}'`}</Code>
         </Section>
 

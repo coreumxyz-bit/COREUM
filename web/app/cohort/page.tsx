@@ -21,8 +21,10 @@ const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 
 const JOIN = `ollama pull llama3.2:3b
 curl -O https://www.coreum.xyz/coreumd.mjs
-node coreumd.mjs deploy --name my-core --tx 0x…   # --tx: your 100k $CORS burn, optional
-node coreumd.mjs serve`;
+node coreumd.mjs deploy --name my-core
+node coreumd.mjs serve
+
+# verified core: add --tx 0x… (your 100k $CORS burn)`;
 
 async function Board() {
   await connection();
