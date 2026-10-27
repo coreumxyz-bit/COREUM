@@ -6,6 +6,7 @@ import "./hero.css";
 import "./motion.css";
 import PointerGlow from "@/components/PointerGlow";
 import ChatWidget from "@/components/ChatWidget";
+import MotionInit from "@/components/MotionInit";
 
 // variable font: the hero and nav use in-between weights like 450
 const inter = Inter({
@@ -44,6 +45,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         {children}
         <PointerGlow />
+        <MotionInit />
         <Suspense fallback={null}>
           <ChatWidget />
         </Suspense>

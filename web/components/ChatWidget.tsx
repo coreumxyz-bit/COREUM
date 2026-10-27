@@ -357,7 +357,7 @@ export function ChatBox({ full = false }: { full?: boolean }) {
 
   const thread = (
     <div className="min-h-0 flex-1 overflow-y-auto">
-      <div className={`mx-auto flex max-w-[760px] flex-col gap-6 ${full ? "px-4 py-8 sm:px-6" : "px-4 py-5"}`}>
+      <div className={`mx-auto flex max-w-[760px] flex-col gap-6 ${full ? "px-4 pt-8 pb-10 sm:px-6" : "px-4 pt-5 pb-6"}`}>
         {msgs.map((m, i) => (
           <Message key={i} m={m} last={i === msgs.length - 1} onRetry={c.retry} />
         ))}
@@ -388,8 +388,8 @@ export function ChatBox({ full = false }: { full?: boolean }) {
     );
 
   return (
-    <div className="flex h-[calc(100dvh-88px)] min-h-0">
-      <aside className="hidden w-[260px] shrink-0 flex-col border-r border-white/[0.08] p-3 lg:flex">
+    <div className="mx-auto flex h-[calc(100dvh-88px)] min-h-0 w-full max-w-[1280px] sm:px-8">
+      <aside className="hidden w-[240px] shrink-0 flex-col border-r border-white/[0.08] py-3 pr-4 lg:flex">
         <button type="button" onClick={c.fresh} className="flex items-center gap-2 rounded-[12px] border border-white/[0.14] px-3 py-2.5 text-[14px] text-white hover:bg-white/[0.06]">
           <span className="text-[18px] leading-none">+</span> New chat
         </button>
@@ -418,6 +418,8 @@ export function ChatBox({ full = false }: { full?: boolean }) {
         {msgs.length ? thread : empty}
         {composer}
       </div>
+      {/* a twin of the history column keeps the conversation centered under the nav */}
+      <div className="hidden w-[240px] shrink-0 xl:block" aria-hidden />
     </div>
   );
 }

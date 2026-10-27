@@ -9,6 +9,7 @@ import BurnCounter from "@/components/BurnCounter";
 import NetworkCard from "@/components/NetworkCard";
 import OnchainProof from "@/components/OnchainProof";
 import AskBox from "@/components/AskBox";
+import HeroNetwork from "@/components/HeroNetwork";
 import Animate from "@/components/Animate";
 import Words from "@/components/Words";
 import { api } from "@/lib/api";
@@ -21,8 +22,6 @@ export const metadata = {
 };
 
 // sea under a beam of light, shown in black & white
-// already black & white and 1600px wide, so the browser only plays it (no per-frame filter)
-const HERO_VIDEO = "/hero.mp4";
 
 type Net = { done: number; agree: number; ref: number; community_online: number };
 
@@ -132,7 +131,7 @@ export default function Home() {
 
         {/* Hero — what the network is, and the two things to do */}
         <section className="relative min-h-svh w-full overflow-hidden bg-black lg:h-screen lg:min-h-[680px]">
-          <video className="hero-video absolute inset-0 h-full w-full object-cover" src={HERO_VIDEO} poster="/hero-poster.jpg" autoPlay loop muted playsInline preload="auto" />
+          <HeroNetwork />
           <div className="relative z-10 flex h-full flex-col">
             {/* room for the fixed nav */}
             <div className="h-[64px] shrink-0 sm:h-[82px]" />

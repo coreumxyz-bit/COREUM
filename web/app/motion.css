@@ -290,3 +290,49 @@ body::after {
 @keyframes pill-spin { to { --pill-angle: 360deg; } }
 @keyframes pill-nudge { 0%, 70%, 100% { transform: translateX(0); } 80% { transform: translateX(4px); } 90% { transform: translateX(0); } }
 @media (prefers-reduced-motion: reduce) { .chat-pill::before, .chat-pill-arrow { animation: none; } }
+
+/* page transition: the new page fades in (see app/template.tsx) */
+.page-in { animation: page-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+@keyframes page-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* glass cards lean toward the cursor (components/MotionInit.tsx) */
+.glass-fx.tilting,
+.card-glow.tilting,
+.lift.tilting {
+  transform: perspective(900px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(-3px);
+  transition: transform 0.15s ease-out, border-color 0.4s ease, background-color 0.4s ease;
+}
+
+/* section titles: a light runs across them once, as they appear */
+.rv.on h2 {
+  background: linear-gradient(110deg, #fff 0%, #fff 42%, rgba(255, 255, 255, 0.35) 50%, #fff 58%, #fff 100%);
+  background-size: 260% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: title-shine 1.8s 0.25s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+@keyframes title-shine { from { background-position: 100% 0; } to { background-position: 0% 0; } }
+
+/* reading progress: a hairline across the top, driven by the scroll itself */
+.scroll-progress { display: none; }
+@supports (animation-timeline: scroll()) {
+  .scroll-progress {
+    display: block;
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 70;
+    height: 2px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.2), #fff);
+    transform-origin: 0 50%;
+    animation: scroll-grow linear both;
+    animation-timeline: scroll(root);
+    pointer-events: none;
+  }
+}
+@keyframes scroll-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .page-in, .rv.on h2, .scroll-progress { animation: none; }
+  .glass-fx.tilting, .card-glow.tilting, .lift.tilting { transform: none; }
+}
