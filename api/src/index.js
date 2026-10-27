@@ -6,6 +6,7 @@ import { makePons } from './pons.js';
 import { makeCors, HOLDER_PER_DAY as CORS_HOLDER_PER_DAY } from './cors.js';
 import { makeChat, CHAT_HOLDER_PER_DAY } from './chat.js';
 import { makeChats } from './chats.js';
+import { makeOutcomes } from './outcomes.js';
 
 const SYMS = {
   BTC: 'BTC-USD', ETH: 'ETH-USD', SOL: 'SOL-USD', DOGE: 'DOGE-USD', LINK: 'LINK-USD',
@@ -75,6 +76,7 @@ const PONS = makePons({ now });
 const CORS = makeCors({ sha, now });
 const CHAT = makeChat({ V, now, sha });
 const CHATS = makeChats({ now });
+const OUT = makeOutcomes({ now });
 
 const last = (db, s) =>
   db.prepare('SELECT p,t FROM prices WHERE sym=? ORDER BY t DESC LIMIT 1').bind(s).first();
@@ -473,7 +475,7 @@ async function weeklyPost(env, force) {
 // Cloudflare egress); this cron is the reliable clock that starts them —
 // GitHub's scheduled workflows were starting hours late.
 const SITE_URL = 'https://www.coreum.xyz';
-const SITE_HOURLY = ['/api/radar/run', '/api/watch/run', '/api/pons/sync'];
+const SITE_HOURLY = ['/api/radar/run', '/api/watch/run', '/api/pons/sync', '/api/outcomes/run'];
 async function siteHourly(env) {
   const db = env.DB, t = now();
   const last = Number((await db.prepare("SELECT v FROM chain_state WHERE k='site_hourly'").first())?.v || 0);
@@ -802,6 +804,14 @@ const worker = {
       }
       if (p === '/api/watch/status') return J(await W.status(env, q.get('address'), await sha('ip' + cip(req, env))));
       if (p === '/api/watch' && req.method === 'GET') return J(await W.list(env));
+      // outcomes: what became of checked tokens after 24h and 7d (the site measures, this stores)
+      if (p === '/api/outcomes/stats') return J(await OUT.stats(env));
+      if (p === '/api/outcomes/due' || p === '/api/outcomes/record') {
+        const admin = env.ADMIN_SECRET || env.SHARED_SECRET;
+        if (!admin || req.headers.get('x-coreum-admin') !== admin) return J({ error: 'forbidden' }, 403);
+        if (p === '/api/outcomes/due') return J(await OUT.due(env, Math.min(+q.get('limit') || 60, 120)));
+        return J(await OUT.record(env, await req.json()));
+      }
       if (p === '/api/watch/all' || p === '/api/watch/update') {
         const admin = env.ADMIN_SECRET || env.SHARED_SECRET;
         if (!admin || req.headers.get('x-coreum-admin') !== admin) return J({ error: 'forbidden' }, 403);
