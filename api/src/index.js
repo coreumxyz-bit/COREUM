@@ -694,8 +694,13 @@ const worker = {
         if (!env.SHARED_SECRET || req.headers.get('x-coreum-secret') !== env.SHARED_SECRET) return J({ error: 'forbidden' }, 403);
         const holder = req.headers.get('x-coreum-holder');
         const isH = holder && (await CORS.isHolder(env, holder));
-        const r = await CHAT.chat(env, await req.json(), isH ? 'holder:' + holder.toLowerCase() : 'ip:' + cip(req, env), isH ? CHAT_HOLDER_PER_DAY : undefined);
-        return r.e ? J({ error: r.e }, r.s) : J(r);
+        const ok = await CHAT.admit(env, await req.json(), isH ? 'holder:' + holder.toLowerCase() : 'ip:' + cip(req, env), isH ? CHAT_HOLDER_PER_DAY : undefined);
+        if (ok.e) return J({ error: ok.e }, ok.s);
+        const { readable, writable } = new TransformStream();
+        const w = writable.getWriter(), enc = new TextEncoder();
+        const send = (ev) => w.write(enc.encode('data: ' + JSON.stringify(ev) + '\n\n'));
+        ctx.waitUntil(CHAT.run(env, ok.hist, ok.left, send).finally(() => w.close()));
+        return new Response(readable, { headers: { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-store' } });
       }
       if (p === '/api/ask' && req.method === 'POST') {
         const b = await req.json();
