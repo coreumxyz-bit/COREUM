@@ -3,6 +3,7 @@ import { makeVerify } from './verify.js';
 import { makeWatch } from './watch.js';
 import { makeDeployer } from './deployer.js';
 import { makePons } from './pons.js';
+import { makeCors, HOLDER_PER_DAY as CORS_HOLDER_PER_DAY } from './cors.js';
 
 const SYMS = {
   BTC: 'BTC-USD', ETH: 'ETH-USD', SOL: 'SOL-USD', DOGE: 'DOGE-USD', LINK: 'LINK-USD',
@@ -30,7 +31,6 @@ const LINE = {
 const CORS_ADDR = '0x3a2ec7aeb4b3c3d6ae9ff6f390bc9da05a8cb945';
 const BURN_ADDR = '0x000000000000000000000000000000000000dEaD';
 const TRANSFER_TOPIC = '0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef';
-const FEE_WEI = 100000000000000000n; // 0.1 CORS deploy fee
 
 const cip = (req, env) =>
   (env.SHARED_SECRET &&
@@ -70,6 +70,7 @@ const V = makeVerify({ append, sha, now });
 const W = makeWatch({ sha, now });
 const D = makeDeployer({ now });
 const PONS = makePons({ now });
+const CORS = makeCors({ sha, now });
 
 const last = (db, s) =>
   db.prepare('SELECT p,t FROM prices WHERE sym=? ORDER BY t DESC LIMIT 1').bind(s).first();
@@ -329,35 +330,6 @@ async function buybackBurn(db) {
   } catch (e) {}
 }
 
-/**
- * Verify an on-chain deploy fee against Robinhood Chain: the receipt must be
- * a successful ERC-20 transfer of >= 0.1 CORS from the paying wallet to the
- * burn address. Returns false when RPC_URL is unset or anything mismatches —
- * an unverified payment simply doesn't count.
- */
-async function verifyBurn(env, tx, wallet) {
-  if (!env.RPC_URL || !/^0x[0-9a-fA-F]{64}$/.test(tx || '')) return false;
-  try {
-    const r = await fetch(env.RPC_URL, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_getTransactionReceipt', params: [tx] }),
-      signal: AbortSignal.timeout(8000)
-    });
-    const rc = (await r.json()).result;
-    if (!rc || rc.status !== '0x1' || (rc.to || '').toLowerCase() !== CORS_ADDR.toLowerCase()) return false;
-    const payer = '0x' + wallet.toLowerCase().replace(/^0x/, '');
-    for (const lg of rc.logs || []) {
-      if ((lg.address || '').toLowerCase() !== CORS_ADDR.toLowerCase()) continue;
-      if (!Array.isArray(lg.topics) || lg.topics.length < 3 || lg.topics[0] !== TRANSFER_TOPIC) continue;
-      if ('0x' + lg.topics[1].slice(-40).toLowerCase() !== payer) continue;
-      if (lg.topics[2].slice(-40).toLowerCase() !== BURN_ADDR.slice(2).toLowerCase()) continue;
-      if (BigInt(lg.data) >= FEE_WEI) return true;
-    }
-    return false;
-  } catch (e) { console.error('verifyBurn: ' + e.message); return false; }
-}
-
 // ---- daily digest → Telegram / X -------------------------------------------------
 // At 00:03–00:30 UTC the completed day's digest is built once (idempotent,
 // one row per date in daily_posts) and pushed to whichever channels have
@@ -371,19 +343,6 @@ async function hmacSha1(key, msg) {
     { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']);
   return btoa(String.fromCharCode(...new Uint8Array(
     await crypto.subtle.sign('HMAC', k, new TextEncoder().encode(msg)))));
-}
-
-async function corsBalance(env, addr) {
-  try {
-    const r = await (await fetch(env.RPC_URL, {
-      method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        jsonrpc: '2.0', id: 1, method: 'eth_call',
-        params: [{ to: CORS_ADDR, data: '0x70a08231' + addr.slice(2).padStart(64, '0') }, 'latest']
-      })
-    })).json();
-    return BigInt(r.result || '0x0');
-  } catch (e) { console.error('corsBalance: ' + e.message); return 0n; }
 }
 
 async function digestRange(db, from, to, title) {
@@ -757,9 +716,20 @@ const worker = {
         // Pons Radar asks through the site with the admin key: its own quota, never a visitor's
         const admin = env.ADMIN_SECRET || env.SHARED_SECRET;
         const radar = fromSite && b.radar === true && admin && req.headers.get('x-coreum-admin') === admin;
-        const r = radar
-          ? await V.ask(env, ctx, b.q, 'radar', src && { ...src, via: src.via === 'watch' ? 'watch' : 'radar' }, 200)
-          : await V.ask(env, ctx, b.q, a ? 'agent:' + a.id : await sha('ip' + cip(req, env)), src);
+        // $CORS: an API key bought with a burn, a burned check past the limit, or the holder tier
+        const key = !a && k ? await CORS.apiKey(env, k) : null;
+        const paid = fromSite && req.headers.get('x-coreum-paid');
+        const holder = fromSite && req.headers.get('x-coreum-holder');
+        let r;
+        if (radar) r = await V.ask(env, ctx, b.q, 'radar', src && { ...src, via: src.via === 'watch' ? 'watch' : 'radar' }, 200);
+        else if (a) r = await V.ask(env, ctx, b.q, 'agent:' + a.id, src);
+        else if (k && !key) return J({ error: 'unknown or expired API key' }, 401);
+        else if (key) r = await V.ask(env, ctx, b.q, 'key:' + key.id, src, key.quota);
+        else if (paid && (await CORS.burnReady(env, paid, 'check'))) {
+          r = await V.ask(env, ctx, b.q, 'burn:' + paid, src, 1);
+          if (!r.e) await CORS.useBurn(env, paid, 'check');
+        } else if (holder && (await CORS.isHolder(env, holder))) r = await V.ask(env, ctx, b.q, 'holder:' + holder.toLowerCase(), src, CORS_HOLDER_PER_DAY);
+        else r = await V.ask(env, ctx, b.q, await sha('ip' + cip(req, env)), src);
         return r.e ? J({ error: r.e }, r.s) : J(r);
       }
       if (p === '/api/job') {
@@ -767,6 +737,15 @@ const worker = {
         return r ? J(r) : J({ error: 'not found' }, 404);
       }
       if (p === '/api/jobs') return J(await V.recent(env, Math.min(+q.get('limit') || 20, 100)));
+      // ---- $CORS in the network (site only: the site reads the chain, this keeps the records) ----
+      if (p === '/api/cors-utility') return J(await CORS.status(env));
+      if (p === '/api/holder/record' || p === '/api/burn/record' || p === '/api/apikey/create' || p === '/api/holder/status') {
+        if (!env.SHARED_SECRET || req.headers.get('x-coreum-secret') !== env.SHARED_SECRET) return J({ error: 'forbidden' }, 403);
+        if (p === '/api/holder/status') return J({ holder: await CORS.isHolder(env, q.get('addr')) });
+        const body = await req.json();
+        const r = p === '/api/holder/record' ? await CORS.recordHolder(env, body) : p === '/api/burn/record' ? await CORS.recordBurn(env, body) : await CORS.createKey(env, body);
+        return r.e ? J({ error: r.e }, r.s) : J(r);
+      }
       // ---- deployer history store (site only: the site scans the chain, this keeps the result) ----
       if (p === '/api/deployer') {
         if (!env.SHARED_SECRET || req.headers.get('x-coreum-secret') !== env.SHARED_SECRET) return J({ error: 'forbidden' }, 403);
@@ -864,22 +843,23 @@ const worker = {
           strat = b.strat;
         if (!name || !['momentum', 'meanrev', 'breakout', 'external'].includes(strat))
           return J({ error: 'bad name or strategy' }, 400);
-        const wallet = String(b.wallet || '').trim();
+        let wallet = String(b.wallet || '').trim();
         if (wallet && !/^0x[a-fA-F0-9]{40}$/.test(wallet))
           return J({ error: 'invalid wallet address' }, 400);
         const tx = String(b.tx || '').trim();
-        const claimed = Math.max(0, Math.min(1000, +b.cors_paid || 0));
-        // The fee only counts when its burn tx verifies on-chain — an
-        // unverified or missing tx simply deploys with cors_paid = 0.
-        let corsPaid = 0, verified = 0;
-        if (tx && wallet) {
-          verified = await verifyBurn(env, tx, wallet) ? 1 : 0;
-          corsPaid = verified ? claimed : 0;
-        }
         const ip = await sha('ip' + cip(req, env));
         if ((await db.prepare('SELECT COUNT(*) c FROM agents WHERE ip_hash=? AND created>?')
           .bind(ip, now() - 86400).first()).c >= 3)
           return J({ error: 'limit: 3 agents per day' }, 429);
+        // A verified core burned $CORS; the site read that burn on chain. No tx: an unverified core.
+        let corsPaid = 0;
+        if (tx) {
+          // recorded by the site after it read the receipt on chain (POST /api/cors/burn, purpose "core")
+          const burn = await CORS.useBurn(env, tx, 'core');
+          if (!burn) return J({ error: 'that burn is not recorded or was already used — record it at coreum.xyz/cors first' }, 402);
+          corsPaid = Number(BigInt(burn.amount) / 10n ** 18n);
+          wallet = burn.addr;
+        }
         const focus = String(b.focus || '').split(',').filter(x => x in SYMS).join(',') || ALL,
           id = crypto.randomUUID().slice(0, 8),
           key = 'ck_' + crypto.randomUUID().replaceAll('-', '');
@@ -902,18 +882,12 @@ const worker = {
           console.error('agent insert failed: ' + e.message);
           return J({ error: 'could not create the node' }, 500);
         }
-        if (tx) {
+        const verified = corsPaid > 0 ? 1 : 0;
+        if (verified) {
           try {
-            await db.prepare('INSERT INTO cors_payments(agent,wallet,amount,tx,verified,ts) VALUES(?,?,?,?,?,?)')
-              .bind(id, wallet || 'none', claimed, tx, verified, now()).run();
+            await db.prepare('INSERT INTO cors_payments(agent,wallet,amount,tx,verified,ts) VALUES(?,?,?,?,1,?)')
+              .bind(id, wallet || 'none', corsPaid, tx, now()).run();
           } catch (e) {}
-          if (verified) {
-            // the tokens are on-chain at the burn address — record the burn
-            try {
-              await db.prepare('INSERT INTO cors_burns(amount,tx,ts) VALUES(?,?,?)')
-                .bind(claimed, tx, now()).run();
-            } catch (e) {}
-          }
         }
         await append(db, 'agent_deploy', {
           agent: id, handle, wallet: wallet || null,
@@ -1096,23 +1070,8 @@ const worker = {
         });
       }
       if (p === '/api/holder/verify' && req.method === 'POST') {
-        // Proof of wallet ownership (EIP-191) + on-chain balance ≥ threshold.
-        // Off-chain, costs no gas — this is how $CORS gets privileges.
-        const b = await req.json();
-        const addr = String(b.addr || '').toLowerCase();
-        if (!/^0x[a-f0-9]{40}$/.test(addr)) return J({ error: 'bad address' }, 400);
-        let who = '';
-        try { who = verifyMessage('Coreum holder check\n' + addr, String(b.sig || '')).toLowerCase(); }
-        catch (e) { return J({ error: 'bad signature' }, 400); }
-        if (who !== addr) return J({ error: 'signature does not match address' }, 403);
-        const bal = await corsBalance(env, addr);
-        const min = BigInt(env.CORS_HOLDER_MIN || '10000') * 10n ** 18n;
-        if (bal < min)
-          return J({ ok: 0, error: 'balance below ' + (min / 10n ** 18n) + ' CORS', amount: String(bal / 10n ** 18n) });
-        await db.prepare(
-          'INSERT INTO holders(addr,amount,ts) VALUES(?,?,?) ON CONFLICT(addr) DO UPDATE SET amount=excluded.amount,ts=excluded.ts'
-        ).bind(addr, String(bal), now()).run();
-        return J({ ok: 1, amount: String(bal / 10n ** 18n) });
+        // the public RPC turns away Cloudflare Workers, so the site reads the balance now
+        return J({ error: 'moved: holders verify on coreum.xyz/cors (POST /api/cors/holder)' }, 410);
       }
       if (p === '/api/holder/like' && req.method === 'POST') {
         // A holder's like weighs 5× (one verified address = one vote per post).

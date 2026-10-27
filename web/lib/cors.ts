@@ -30,8 +30,9 @@ export function formatCors(amount: number, decimals = 2): string {
   return amount.toFixed(decimals);
 }
 
+// exact for whole and fractional amounts alike (floats lose digits at 1e23+)
 export function corsToWei(amount: number): bigint {
-  return BigInt(Math.round(amount * 1e18));
+  return BigInt(Math.round(amount * 1e4)) * BigInt("100000000000000");
 }
 
 export function weiToCors(wei: bigint): number {

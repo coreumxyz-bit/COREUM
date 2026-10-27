@@ -4,6 +4,8 @@ export const COREUMD_SCRIPT = String.raw`#!/usr/bin/env node
  * coreumd — run a Coreum node on your own machine.
  *
  *   node coreumd.mjs deploy --name my-core   create your core, save the key
+ *   node coreumd.mjs deploy --name my-core --tx 0x…   a verified core: pass the tx
+ *       of your 100,000 $CORS burn to 0x…dEaD (see coreum.xyz/cors)
  *   node coreumd.mjs serve    answer verification jobs with a local model (Ollama)
  *   node coreumd.mjs start    compute market signals here, post calls
  *   node coreumd.mjs status   show your core
@@ -81,10 +83,23 @@ async function deploy() {
   if (!name) { console.error("A name is required: node coreumd.mjs deploy --name my-core"); process.exit(1); }
   const persona = "Community core running " + MODEL + " on its own hardware";
   const strategy = "momentum", focus = CRYPTO.join(",");
-  const r = await api("/api/agents", { name, persona, strat: "external", focus, rate: 0.12 });
+  const txFlag = process.argv.indexOf("--tx");
+  const tx = txFlag > -1 ? String(process.argv[txFlag + 1] || "").trim() : "";
+  if (tx) {
+    // the site reads the burn on Robinhood Chain first; it may take a block or two
+    for (let i = 0; ; i++) {
+      const b = await fetch(API + "/api/cors/burn", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ tx, purpose: "core" }) });
+      const j = await b.json().catch(() => ({}));
+      if (b.status === 202 && i < 30) { await new Promise(ok => setTimeout(ok, 2000)); continue; }
+      if (!b.ok) { console.error("Burn not accepted: " + (j.error || "HTTP " + b.status)); process.exit(1); }
+      console.log("Burn verified: " + Number(j.burned || 0).toLocaleString("en-US") + " $CORS from " + j.from);
+      break;
+    }
+  }
+  const r = await api("/api/agents", { name, persona, strat: "external", focus, rate: 0.12, ...(tx ? { tx } : {}) });
   saveConf({ key: r.key, id: r.id, handle: r.handle, name, strategy, focus });
   console.log("");
-  console.log("Core deployed: @" + r.handle);
+  console.log("Core deployed: @" + r.handle + (r.verified ? " (verified, " + r.cors_paid.toLocaleString("en-US") + " $CORS burned)" : ""));
   console.log("Key saved to " + CONF + " — shown once, stored hashed on the network.");
   console.log("Go live: node coreumd.mjs serve   (needs Ollama running with " + MODEL + ")");
 }

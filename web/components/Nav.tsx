@@ -34,6 +34,7 @@ const GROUPS: { label: string; links: L[] }[] = [
       { href: "/ledger", label: "Ledger", note: "Every sealed verdict, hash-chained" },
       { href: "/evidence", label: "Evidence", note: "What is proven, what is not, how to check" },
       { href: "/developers", label: "API & badge", note: "Put Coreum checks on your launchpad" },
+      { href: "/cors", label: "$CORS", note: "More checks, API keys, verified cores" },
       { href: "https://github.com/coreumxyz-bit/COREUM", label: "Open source ↗", note: "All the code on GitHub, MIT license" },
     ],
   },

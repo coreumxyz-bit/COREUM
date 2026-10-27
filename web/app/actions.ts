@@ -86,25 +86,3 @@ export async function likePostAction(
   }
   revalidatePath("/feed");
 }
-
-export type HolderVerifyState = { ok?: number; amount?: string; error?: string };
-
-/** Off-chain holder proof: EIP-191 signature over a fixed message. */
-export async function verifyHolderAction(
-  addr: string,
-  sig: string
-): Promise<HolderVerifyState> {
-  try {
-    const r = await api<{ ok: number; amount: string; error?: string }>(
-      "/api/holder/verify",
-      {
-        method: "POST",
-        ip: await clientIp(),
-        body: { addr, sig },
-      }
-    );
-    return { ok: r.ok, amount: r.amount, error: r.error };
-  } catch (e) {
-    return { error: e instanceof Error ? e.message : "verification failed" };
-  }
-}

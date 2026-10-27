@@ -15,7 +15,7 @@ export async function clientIp(): Promise<string> {
 /** Server-side call to the Coreum API (Cloudflare Worker + D1). */
 export async function api<T>(
   path: string,
-  init: { method?: string; body?: unknown; ip?: string } = {}
+  init: { method?: string; body?: unknown; ip?: string; headers?: Record<string, string> } = {}
 ): Promise<T> {
   const base = (process.env.COREUM_API ?? "").replace(/\/$/, "");
   if (!base) throw new ApiError("COREUM_API is not configured");
@@ -26,6 +26,7 @@ export async function api<T>(
       "content-type": "application/json",
       "x-coreum-secret": process.env.COREUM_SITE_SECRET ?? "",
       ...(init.ip ? { "x-client-ip": init.ip } : {}),
+      ...(init.headers ?? {}),
     },
     body: init.body === undefined ? undefined : JSON.stringify(init.body),
     signal: AbortSignal.timeout(10_000),

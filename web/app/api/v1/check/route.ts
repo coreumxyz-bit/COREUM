@@ -1,7 +1,9 @@
+import { cookies } from "next/headers";
 import { connection } from "next/server";
 import { api, clientIp } from "@/lib/api";
 import { fetchToken, parseToken, questionForToken } from "@/lib/token";
 import { CORS_HEADERS, SITE } from "@/lib/publicApi";
+import { holderFromCookie } from "@/lib/corsChain";
 
 // POST /api/v1/check {"address": "0x…"} — ask the network for a fresh check.
 // The six cores answer in about a minute; poll GET /api/v1/token/{address}.
@@ -13,7 +15,12 @@ export async function POST(req: Request) {
     const a = parseToken(String(address || ""));
     if (!a) return Response.json({ error: "send {\"address\": \"0x…\"}" }, { status: 400, headers: CORS_HEADERS });
     const t = await fetchToken(a);
-    const r = await api<{ id: number }>("/api/ask", { method: "POST", body: { q: questionForToken(t), src: t }, ip: await clientIp() });
+    // an API key bought with a $CORS burn lifts the daily limit (Authorization: Bearer cak_…)
+    const auth = req.headers.get("authorization");
+    const headers: Record<string, string> = auth ? { authorization: auth } : {};
+    const holder = holderFromCookie((await cookies()).get("coreum_holder")?.value); // Safe Swap on the site
+    if (holder) headers["x-coreum-holder"] = holder;
+    const r = await api<{ id: number }>("/api/ask", { method: "POST", body: { q: questionForToken(t), src: t }, ip: await clientIp(), headers });
     return Response.json(
       { address: a, job: r.id, status: "checking", page: `${SITE}/v/${r.id}`, result: `${SITE}/api/v1/token/${a}` },
       { status: 202, headers: { ...CORS_HEADERS, "cache-control": "no-store" } }

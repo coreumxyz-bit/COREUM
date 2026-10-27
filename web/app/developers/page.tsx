@@ -97,6 +97,15 @@ export default function DevelopersPage() {
   -d '{"address": "${A}"}'
 
 → 202 {"job": 99, "status": "checking", "page": "${SITE}/v/99", ...}`}</Code>
+          <p className="mt-4">
+            50 checks a day per IP for free. For more, burn 1,000,000 $CORS on{" "}
+            <Link href="/cors" className="underline decoration-white/30 underline-offset-4 hover:text-white">/cors</Link> for an API
+            key with 500 checks a day for 30 days, and send it as a header:
+          </p>
+          <Code>{`curl -X POST ${SITE}/api/v1/check \
+  -H "authorization: Bearer cak_…" \
+  -H "content-type: application/json" \
+  -d '{"address": "${A}"}'`}</Code>
         </Section>
 
         <Section n="03" title="Drop in the badge">
