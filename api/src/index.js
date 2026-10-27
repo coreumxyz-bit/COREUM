@@ -518,7 +518,7 @@ async function memo(key, ttl, fn) {
 const GET_TTL = {
   '/api/state': 15, '/api/feed': 15, '/api/swarm': 15, '/api/agents': 30, '/api/arena': 30,
   '/api/stats': 120, '/api/ledger': 15, '/api/anchors': 60, '/api/holders': 120, '/api/cors': 60,
-  '/api/jobs': 3, '/api/network': 5, '/api/cores': 15, '/api/export': 300,
+  '/api/jobs': 3, '/api/network': 5, '/api/cores': 15, '/api/cohort': 30, '/api/export': 300,
   '/api/weekly_posts': 300, '/api/daily_posts': 300, '/api/token-checks': 10, '/api/token-verdict': 10, '/api/pons': 120, '/api/pons-deployer': 120, '/api/truth-board': 30, '/api/verdicts/latest': 60, '/api/radar': 30, '/api/watch': 20,
 };
 
@@ -794,6 +794,7 @@ const worker = {
       }
       if (p === '/api/truth-board') return J(await V.truthBoard(env, (q.get('handle') || '').replace(/^@/, '').slice(0, 40)));
       if (p === '/api/cores') return J(await V.cores(env));
+      if (p === '/api/cohort') return J(await V.cohort(env));
       if (p === '/api/network') return J(await V.stats(env));
       if (p === '/api/burns') {
         // The public RPC turns away Cloudflare egress, so burns are read from the

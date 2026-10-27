@@ -31,6 +31,7 @@ const GROUPS: { label: string; links: L[] }[] = [
     links: [
       { href: "/cores", label: "Cores", note: "Who answers, and how often they agree" },
       { href: "/nodes", label: "Run a core", note: "Join the network from your own machine" },
+      { href: "/cohort", label: "First 50 cores", note: "Seats taken by the first valid answers" },
       { href: "/ledger", label: "Ledger", note: "Every sealed verdict, hash-chained" },
       { href: "/evidence", label: "Evidence", note: "What is proven, what is not, how to check" },
       { href: "/developers", label: "API & badge", note: "Put Coreum checks on your launchpad" },

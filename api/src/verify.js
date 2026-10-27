@@ -329,6 +329,19 @@ export function makeVerify({ append, sha, now }) {
     ).all()).results;
   }
 
+  // First 50 cores: community cores in the order of their first valid answer.
+  // A seat is taken by work, not by signing up; test models don't count.
+  async function cohort(env) {
+    const rows = (await env.DB.prepare(
+      `SELECT a.id,a.name,a.handle,a.wallet,a.cors_paid,a.created,a.last_seen,
+        MIN(w.ts_reveal) first, COUNT(*) jobs, SUM(w.reward>0) majority,
+        (SELECT model FROM job_work x WHERE x.core=a.id ORDER BY ts_commit DESC LIMIT 1) model
+       FROM agents a JOIN job_work w ON w.core=a.id AND w.ok=1 AND w.model NOT LIKE 'test:%'
+       WHERE a.kind='external' GROUP BY a.id ORDER BY first LIMIT 50`
+    ).all()).results;
+    return { seats: 50, taken: rows.length, cores: rows.map((r, i) => ({ seat: i + 1, ...r, verified: r.cors_paid > 0 })) };
+  }
+
   async function recent(env, n) {
     return (await env.DB.prepare(
       "SELECT id,q,phase,verdict,agree,n,h,created,done_at,src FROM jobs WHERE phase IN ('done','failed') ORDER BY id DESC LIMIT ?"
@@ -413,5 +426,5 @@ export function makeVerify({ append, sha, now }) {
     return { ...s, ref: activeCores(env).length, community_online: online };
   }
 
-  return { ask, view, work, commit, reveal, sweep, cores, recent, stats, advance, tokenChecks, tokenVerdict, truthBoard, radar, radarKnown };
+  return { ask, view, work, commit, reveal, sweep, cores, cohort, recent, stats, advance, tokenChecks, tokenVerdict, truthBoard, radar, radarKnown };
 }

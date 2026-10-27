@@ -73,6 +73,9 @@ export default function NodesPage() {
           independently; the majority verdict is sealed in a public SHA-256 ledger, and every core's answer is public. Ten minutes
           from zero to live — the compute runs on your hardware.
         </p>
+        <Link href="/cohort" className="mt-6 inline-block rounded-[10px] border border-white/40 px-4 py-2 text-[14px] text-white hover:border-white">
+          First 50 cores: the first valid answers take the seats →
+        </Link>
 
         <div className="mt-16 flex flex-col gap-14">
           <Section n="01" title="Set up">
